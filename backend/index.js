@@ -8,36 +8,35 @@ import morgan from "morgan"; // For logging requests into console
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
-import authRoutes from "./routes/auth.js"; // importing authentication related routers
-import mediaRoutes from "./routes/media.js"; // importing media related routers
+import authRoutes from "./routes/auth.js"; // Importing authentication related routers
+import mediaRoutes from "./routes/media.js"; // Importing media related routers
 import cloudinary from "cloudinary"; // For uploading media to cloudinary
-// Return "https" URLs by setting secure: true
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
+
+dotenv.config(); // Load environment variables
+
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: 'dnctvkwuo', 
+  api_key: '413423532152765', 
+  api_secret: 'Qflnwdrbs3AXzHNQLFjNYcPloiw' 
 });
 
-// Log the configuration
-console.log(cloudinary.config());
-
-dotenv.config();
+// Log the Cloudinary configuration
+console.log("Cloudinary configured:", cloudinary.v2.config());
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Middleware
 app.use(cors());
 app.use(morgan("dev"));
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
-
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(express.static("dist", { dotfiles: "allow" }));
 
-/* ROUTES */
+// Routes
 app.use("/auth", authRoutes);
 app.use("/media", mediaRoutes);
 
@@ -49,20 +48,19 @@ app.get("*", (req, res) => {
   res.sendFile(__dirname + "/dist/index.html");
 });
 
-const CONNECTION_URL = `mongodb+srv://${
-  process.env.DB_USERNAME
-}:${encodeURIComponent(
-  process.env.DB_PSWD
-)}@cluster.lczmihh.mongodb.net/headout?retryWrites=true&w=majority`;
-const PORT = process.env.PORT || 6001;
-mongoose
-  .connect(CONNECTION_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    app.listen(PORT, () => console.log(`SERVER PORT: ${PORT}`));
-  })
-  .catch((error) => console.log(`${error} did not connect`));
+// MongoDB Connection
+const CONNECTION_URL = "mongodb+srv://agnihotrisundaram8:s123@cluster0.o3zcv.mongodb.net/"
 
-  export default app;
+const PORT = process.env.PORT || 6001;
+
+mongoose
+  .connect(CONNECTION_URL)
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(PORT, () => console.log(`Server is running on PORT: ${PORT}`));
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error.message);
+  });
+
+export default app;
